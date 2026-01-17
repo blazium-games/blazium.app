@@ -60,12 +60,6 @@ func loadTemplates(basePath string) error {
 		"toHTML": func(s string) template.HTML {
 			return template.HTML(s)
 		},
-		// Used to get the blog id from the indieDB link
-		"getBlogId": func(s string) string {
-			parts := strings.Split(s, "/")
-			parts = parts[len(parts)-2:]
-			return strings.Join(parts, "/")
-		},
 		"add": func(x, y int) int { return x + y },
 		"sub": func(x, y int) int { return x - y },
 	}

@@ -9,19 +9,15 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gorilla/mux"
-	"github.com/quic-go/quic-go/http3"
 )
 
 type ArticleData struct {
-	Image     string
-	Title     string
-	Published string
-	Link      string
+	Content string
+	Title   string
 }
 
 type MetaTags struct {
@@ -31,7 +27,7 @@ type MetaTags struct {
 	Image       string
 }
 
-type BlogArticle struct {
+type GameArticle struct {
 	MetaTags    MetaTags
 	ArticleData ArticleData
 }
@@ -231,209 +227,6 @@ func handleFetchCerebroToolData(w http.ResponseWriter, r *http.Request) {
 	serveJSON(w, versionData)
 }
 
-// BlogHandler handles the /blog endpoint
-func BlogHandler(w http.ResponseWriter, r *http.Request) {
-	// if not htmx request or blog button pressed, serve base page
-	if r.Header.Get("hx-request") != "true" || r.Header.Get("hx-trigger-name") == "blog-btn" {
-		articleType := "articles"
-		keyWord := ""
-		page := ""
-		if r.URL.Query().Has("t") {
-			articleType = r.URL.Query().Get("t")
-		}
-		if r.URL.Query().Has("s") {
-			keyWord = r.URL.Query().Get("s")
-		}
-		if r.URL.Query().Has("p") {
-			page = r.URL.Query().Get("p")
-		}
-
-		data := struct {
-			ArticleType string
-			KeyWord     string
-			Page        string
-		}{
-			ArticleType: articleType,
-			KeyWord:     keyWord,
-			Page:        page,
-		}
-
-		serveTemplate(w, "blog", data)
-		return
-	}
-
-	// if htmx request, serve blog articles
-	url := "https://www.indiedb.com/engines/blazium-engine"
-
-	if r.URL.Query().Has("t") {
-		articleType := r.URL.Query().Get("t")
-		url += "/" + articleType
-	} else {
-		url += "/articles"
-	}
-	if r.URL.Query().Has("p") {
-		if page := r.URL.Query().Get("p"); page != "" {
-			url += "/page/" + page
-		}
-	}
-	if r.URL.Query().Has("s") {
-		keyWord := r.URL.Query().Get("s")
-		url += "?filter=t&kw=" + keyWord
-	}
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to create request for article list: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	client := &http.Client{
-		Transport: &http3.Transport{},
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error making request for article list: %v", err), http.StatusInternalServerError)
-		return
-	}
-	// Load the HTML document
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error creating document from article list html: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	var articles []ArticleData
-
-	doc.Find("div.table div.row.rowcontent").Each(func(i int, s *goquery.Selection) {
-		image, _ := s.Find("img").Attr("src")
-		image = strings.ReplaceAll(image, "/cache", "")
-		image = strings.ReplaceAll(image, "/crop_120x90", "")
-
-		title := s.Find("h4").Text()
-
-		published := s.Find("span.date time").Text()
-
-		link, _ := s.Find("a.image").Attr("href")
-
-		article := ArticleData{
-			Image:     image,
-			Title:     title,
-			Published: published,
-			Link:      link,
-		}
-		articles = append(articles, article)
-	})
-
-	pagination := doc.Find("div.pagination div.pages")
-	currentPage, _ := strconv.Atoi(pagination.Find("span.current").Text())
-	pagesAmount, _ := strconv.Atoi(pagination.Children().Last().Text())
-
-	data := struct {
-		Articles   []ArticleData
-		Pagination map[string]int
-	}{
-		Articles:   articles,
-		Pagination: map[string]int{"CurrentPage": currentPage, "PagesAmount": pagesAmount},
-	}
-
-	serveTemplate(w, "blogs-articles", data)
-
-}
-
-// BlogArticleHandler handles the /blog/article endpoint
-func BlogArticleHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	articleType := vars["type"]
-	id := vars["id"]
-
-	url := fmt.Sprintf("https://www.indiedb.com/groups/indiedb/%s/%s", articleType, id)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to create request for article: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	client := &http.Client{
-		Transport: &http3.Transport{},
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error making request for article: %v", err), http.StatusInternalServerError)
-		return
-	}
-	// Load the HTML document
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error creating document from article html: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	article := doc.Find("article #readarticle")
-
-	image, exists := doc.Find("article meta[itemprop=image]").Attr("content")
-	if !exists {
-		http.Error(w, fmt.Sprintf("Error image not found in article: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	indieDBLink, exists := doc.Find("article meta[itemprop=mainEntityOfPage]").Attr("itemid")
-	if !exists {
-		http.Error(w, fmt.Sprintf("Error IndieDB link not found in article: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	title := article.Find("div.title span.heading").Text()
-	published := article.Find("p.introduction").Text()
-	description := article.Find("p.introductiontext").Text()
-
-	// Process each iframe
-	article.Find("iframe").Each(func(i int, iframe *goquery.Selection) {
-		// Create the wrapping div
-		iframe.WrapHtml("<div class='iframe-placeholder'></div>")
-		// Add the section sibling
-		iframe.AfterHtml(`<section><p>
-				We need your consent to show this embed, by clicking <strong>"Accept"</strong>, you agree to the use of cookies.
-				This will activate <strong>all</strong> embeds.
-				For more information, please review our <a href="/privacy-policy">Privacy Policy</a>.</p>
-				<button type="button" class="secondary-btn" onclick="acceptCookies()">Accept</button>
-			</section>
-		`)
-	})
-
-	articleContent := article.Find("#articlecontent")
-
-	// Remove preview image in article content, only useful in IndeDB
-	selector := `p:has(img:only-child):first-of-type,
-		h1:has(img:only-child):first-of-type,
-		h2:has(img:only-child):first-of-type,
-		h3:has(img:only-child):first-of-type,
-		h3:has(img:only-child):first-of-type`
-	articleContent.Find(selector).Remove()
-
-	content, err := articleContent.Html()
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Error getting article html: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	data := BlogArticle{
-		MetaTags: MetaTags{
-			Image:       image,
-			Title:       "Blazium Engine - " + title,
-			Description: description,
-			Url:         fmt.Sprintf("/blog/article/%s/%s", articleType, id),
-		},
-		ArticleData: ArticleData{
-			Title:     title,
-			Published: published,
-			Image:     content, // recycling Image for the content string
-			Link:      indieDBLink,
-		},
-	}
-
-	serveTemplate(w, "blog_article", data)
-}
-
 func GamesHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the game name from the URL
 	vars := mux.Vars(r)
@@ -457,7 +250,7 @@ func GamesHandler(w http.ResponseWriter, r *http.Request) {
 	description, _ := doc.Find("meta[name='short-description']").Attr("content")
 	title, _ := doc.Find("meta[name='game-name']").Attr("content")
 
-	data := BlogArticle{
+	data := GameArticle{
 		MetaTags: MetaTags{
 			Image:       img,
 			Title:       "Blazium Engine - " + title,
@@ -465,12 +258,12 @@ func GamesHandler(w http.ResponseWriter, r *http.Request) {
 			Url:         "/games/" + gameName,
 		},
 		ArticleData: ArticleData{
-			Title: title,
-			Image: content, // Recycling Image for the content string
+			Title:   title,
+			Content: content,
 		},
 	}
 
-	serveTemplate(w, "blog_article", data)
+	serveTemplate(w, "game_article", data)
 }
 
 func ChangelogHandler(w http.ResponseWriter, r *http.Request) {
@@ -879,11 +672,6 @@ func main() {
 
 	// Serve a game page on the path "/games/{gameName}"
 	r.HandleFunc("/games/{gameName}", GamesHandler).Methods("GET")
-
-	r.HandleFunc("/blog-dev", BlogHandler).Methods("GET")
-
-	// Serve blog_article.tmpl on the path "/blog/article"
-	r.HandleFunc("/blog/article/{type}/{id}", BlogArticleHandler).Methods("GET")
 
 	// Serve changelog.tmpl on the path "/changelog"
 	r.HandleFunc("/changelog", ChangelogHandler).Methods("GET")

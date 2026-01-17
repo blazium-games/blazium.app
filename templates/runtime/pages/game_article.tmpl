@@ -1,0 +1,15 @@
+{{/* Template for the game article page */}}
+
+{{define "game_article"}}
+  {{template "main-head" .MetaTags}}
+  <section id="blog-intro">
+    <img src={{.MetaTags.Image}} alt="Cover image">
+    <section>
+      <h1>{{.ArticleData.Title}}</h1>
+    </section>
+  </section>
+  <section class="article">
+  {{toHTML .ArticleData.Content}}
+  </section>
+  {{template "main-foot"}}
+{{end}}
