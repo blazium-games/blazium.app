@@ -14,16 +14,6 @@ htmx.onLoad((content) => {
   hideHamMenu();
   checkNotice();
 
-  // Trigger Prism
-  content.querySelectorAll("pre > code").forEach((block) => {
-    if (block.classList.contains("lang-")) {
-      block.classList.add("language-none");
-    } else {
-      block.classList.add("language-gdscript");
-    }
-  });
-  Prism.highlightAll();
-
   if (window.location.pathname.includes("/dev-tools/download")) {
     handleToolsDownload(content);
   } else if (window.location.pathname.includes("/download")) {
