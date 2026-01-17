@@ -1,23 +1,3 @@
-Prism.plugins.NormalizeWhitespace.setDefaults({
-  'remove-trailing': true,
-  'remove-indent': true,
-  'left-trim': true,
-  'right-trim': false,
-  'remove-initial-line-feed': true,
-});
-Prism.plugins.showInvisibles = {
-  tab: '→',
-  space: ' ',
-};
-// make prism treat js as gds
-Prism.languages.javascript = Prism.languages.gdscript;
-// Add the hook to ensure line numbers are always applied
-Prism.hooks.add('before-sanity-check', function (env) {
-  if (env.element && env.element.parentNode.tagName === 'PRE') {
-    env.element.parentNode.classList.add('line-numbers');
-  }
-});
-
 // Make the header sticky on scroll
 window.addEventListener("scroll", () => {
   const header = document.querySelector("header")
