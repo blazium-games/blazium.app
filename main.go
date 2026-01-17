@@ -527,6 +527,12 @@ func EditorDownloadHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusSeeOther)
 }
 
+func ServeFile(r *mux.Router, fileName string) {
+	r.HandleFunc("/"+fileName, func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join("static", fileName))
+	}).Methods("GET")
+}
+
 func main() {
 	// Generate templates from configs
 	if err := GenerateTemplates(); err != nil {
@@ -551,6 +557,11 @@ func main() {
 	staticFileDirectory := http.Dir("./static")
 	staticFileHandler := http.StripPrefix("/static/", http.FileServer(staticFileDirectory))
 	r.PathPrefix("/static/").Handler(staticFileHandler)
+
+	// Serve files for crawlers
+	ServeFile(r, "sitemap.xml")
+	ServeFile(r, "robots.txt")
+	ServeFile(r, "llms.txt")
 
 	// Serve main.tmpl on the root path "/"
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
