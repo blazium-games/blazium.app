@@ -754,10 +754,10 @@ func main() {
 		serveTemplate(w, "not_found", nil)
 	})
 
-	// Serve robots.txt on the root path "/robots.txt"
-	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, filepath.Join("static", "robots.txt"))
-	}).Methods("GET")
+	// Serve all static files from the "static" directory
+	staticFileDirectory := http.Dir("./static")
+	staticFileHandler := http.StripPrefix("/static/", http.FileServer(staticFileDirectory))
+	r.PathPrefix("/static/").Handler(staticFileHandler)
 
 	// Serve main.tmpl on the root path "/"
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -928,11 +928,6 @@ func main() {
 	r.HandleFunc("/api/editor-sha/{buildType}/BlaziumEditor_v{version}.sha{shaType}", EditorFilesShaHandler).Methods("GET")
 	// Serve templates files sha signature as file
 	r.HandleFunc("/api/templates-sha/{buildType}/Blazium_v{version}_export_templates.sha{shaType}", TemplatesFilesShaHandler).Methods("GET")
-
-	// Serve all static files from the "static" directory
-	staticFileDirectory := http.Dir("./static")
-	staticFileHandler := http.StripPrefix("/static/", http.FileServer(staticFileDirectory))
-	r.PathPrefix("/static/").Handler(staticFileHandler)
 
 	embedHandler := embedMiddleware(r)
 	corsHandler := enableCORS(embedHandler)

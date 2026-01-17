@@ -1,0 +1,34 @@
+# Blazium (game engine)
+> Blazium is a free, open-source, community-driven game engine based on Godot 4.4.1, designed for developing 2D and 3D games, cross-platform projects, and XR experiences. It offers power, flexibility, and compatibility with Godot assets while removing compatibility-breaking features.
+
+Important notes:
+- Blazium is fully compatible with Godot 4.x projects and assets.
+- It provides additional tools, templates, and services to enhance game development.
+- Contributions are welcome through bug reports, code submissions, or documentation improvements, often leveraging Godot's contribution guidelines.
+
+## Documentation
+- [What is Blazium?](https://blazium.app/what-is-blazium): Overview of the engine's features and purpose.
+- [Developer Tools](https://blazium.app/dev-tools): Information on tools, templates, and services available for developers.
+- [Engine Documentation](https://docs.godotengine.org/en/4.4): Comprehensive documentation, as Blazium is built on Godot.
+- [Engine Repository](https://github.com/blazium-games/blazium): Blazium (game engine) GitHub Repository.
+
+## Downloads
+- [Get Blazium](https://blazium.app/download): Download links for the latest version of the engine.
+- [Latest Release: 0.5.68](https://www.indiedb.com/engines/blazium-engine/news/blazium-release-0568): Article detailing the features of the latest Blazium release.
+
+## Examples
+- [Games made with Blazium](https://blazium.app/games): List of games developed using the Blazium engine.
+
+## Community
+- [Join the Discord Server](https://blazium.app/chat): Community chat for discussions, support, and collaboration.
+
+## Contacts
+- [GitHub Org](https://github.com/blazium-games): Blazium Games GitHub Organization.
+- [X/Twitter Profile](https://x.com/BlaziumGames): Blazium Games X/Twitter Profile.
+- [YouTube Channel](https://youtube.com/@blazium): Blazium Games YouTube Channel.
+- [Blazium Games Team](https://blazium.app/meet-the-team): Blazium Games team.
+
+## More by Blazium
+- [Blazium Games](https://blazium.games): Blazium Games provides a platform for developers to share and discover gaming-related assets.
+- [SHOYO.WORK](https://shoyo.work): SHOYO.WORK helps developers, freelancers & teams build professional portfolios to showcase projects with advanced analytics, customizable sections, and secure content. Supports individual & enterprise needs.
+- [RUNE Interface](https://blazium-games.github.io/rune_docs): Documentation for the RUNE interface.
