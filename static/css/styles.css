@@ -1235,12 +1235,63 @@ i.align:before {
   }
 }
 
+@import url("https://api.fontshare.com/v2/css?f[]=nunito@1,2&display=swap");
+
 #blazium-link-menu {
+  all: initial;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+
+  *:not(input) {
+    all: initial;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  --bg: oklch(0.21 0.05 322);
+  --accent: oklch(0.41 0.20 307);
+  --accent-muted: oklch(from var(--accent) l c h / 0.5);
+  --text: oklch(1.00 0.0 0);
+  --text-muted: oklch(0.85 0.0 0);
+
+  --font-family: "Nunito", sans-serif;
+
   --spacing-2xs: 0.25rem;
   --spacing-xs: 0.50rem;
+  --spacing-l: 1.25rem;
   --spacing-xl: 1.50rem;
 
-  background-color: #220F25;
+  --box-shadow:
+    rgba(0, 0, 0, 0.25) 0px 2px 2px,
+    inset rgba(255, 255, 255, 0.15) 0px 1px 0px,
+    inset rgba(0, 0, 0, 0.25) 0px 0px 0px,
+    inset rgba(255, 255, 255, 0.05) 0px 20px 4px,
+    inset rgba(0, 0, 0, 0.15) 0px -20px 20px,
+    inset rgba(255, 255, 255, 0.05) 0px 20px 20px;
+
+  --hover-box-shadow:
+    rgba(0, 0, 0, 0.25) 0px 2px 2px,
+    inset rgba(255, 255, 255, 0.25) 0px 1px 0px,
+    inset rgba(0, 0, 0, 0.25) 0px 0px 0px,
+    inset rgba(255, 255, 255, 0.05) 0px 20px 4px,
+    inset rgba(0, 0, 0, 0.15) 0px -20px 20px,
+    inset rgba(255, 255, 255, 0.05) 0px 20px 20px;
+
+  --active-box-shadow:
+    rgba(0, 0, 0, 0.25) 0px 0px 0px,
+    inset rgba(255, 255, 255, 0) 0px 1px 0px,
+    inset rgba(0, 0, 0, 0.5) 0px 0px 5px,
+    inset rgba(255, 255, 255, 0.05) 0px 15px 4px,
+    inset rgba(0, 0, 0, 0.15) 0px -20px 20px,
+    inset rgba(255, 255, 255, 0.05) 0px 20px 20px;
+
+  --text-shadow: 0px 1px 2px oklch(0 0 0 / 0.9);
+
+  box-shadow: var(--box-shadow);
+
+  background-color: var(--bg);
   position: fixed;
   display: flex;
   flex-direction: column;
@@ -1249,108 +1300,61 @@ i.align:before {
   border-bottom-right-radius: 0;
   gap: var(--spacing-xs);
   z-index: 10000;
-
+  border: 1px solid var(--accent-muted);
   padding: var(--spacing-2xs);
   padding-bottom: var(--spacing-xl);
   bottom: -4px;
-  translate: 0 calc(100% - 36px);
+  translate: 0 calc(100% - 32px);
   transition: translate 0.2s cubic-bezier(0, 1.25, 0.5, 1);
 
-  --purple: #660e99;
-  --purple-muted: oklch(from var(--purple) l c h / 0.5);
-
-  border: 1px solid var(--purple-muted);
-
-  hr {
-    height: 1px;
-    background-color: var(--purple-muted);
-  }
-
-  a {
-    display: flex;
-    gap: var(--spacing-2xs);
-    align-items: center;
-    color: var(--gray-80);
-    font-size: 1rem;
-
-    --text-shadow: 0px 1px 2px oklch(0 0 0 / 0.9);
-    text-shadow: var(--text-shadow);
-
-    &:hover {
-      text-decoration: underline;
-    }
-
-    img {
-      filter: drop-shadow(var(--text-shadow));
-      height: 1.5em;
-      width: 1.5em;
-      object-fit: contain;
-    }
-  }
-
   label {
-    padding: 0 var(--spacing-2xs);
-    display: flex;
-    gap: var(--spacing-xs);
-    align-items: center;
-    justify-content: center;
-    width: 100%;
+    padding: 0 var(--spacing-xs);
     border-radius: var(--spacing-xs);
-    padding: var(--spacing-xs) var(--spacing-s);
+    background-color: var(--accent);
+    text-align: center;
+    cursor: pointer;
     user-select: none;
-    background-color: var(--purple);
-    border: 1px solid var(--color-border);
+    -webkit-user-drag: none;
+    color: var(--text-muted);
+    font-family: var(--font-family);
+    font-size: 0.875rem;
+    text-shadow: var(--text-shadow);
+    box-shadow: var(--box-shadow);
+    line-height: var(--spacing-l);
     transition-property: box-shadow, translate, color;
     transition-duration: 0.1s;
-    cursor: pointer;
-    font: var(--small);
-    font-weight: var(--font-w-semibold);
-
-    color: var(--color-text-muted);
-
-    --box-shadow:
-      rgba(0, 0, 0, 0.25) 0px 2px 2px,
-      inset rgba(255, 255, 255, 0.15) 0px 1px 0px,
-      inset rgba(0, 0, 0, 0.25) 0px 0px 0px,
-      inset rgba(255, 255, 255, 0.05) 0px 20px 4px,
-      inset rgba(0, 0, 0, 0.15) 0px -20px 20px,
-      inset rgba(255, 255, 255, 0.05) 0px 20px 20px;
-
-    --hover-box-shadow:
-      rgba(0, 0, 0, 0.25) 0px 2px 2px,
-      inset rgba(255, 255, 255, 0.25) 0px 1px 0px,
-      inset rgba(0, 0, 0, 0.25) 0px 0px 0px,
-      inset rgba(255, 255, 255, 0.05) 0px 20px 4px,
-      inset rgba(0, 0, 0, 0.15) 0px -20px 20px,
-      inset rgba(255, 255, 255, 0.05) 0px 20px 20px;
-
-    --active-box-shadow:
-      rgba(0, 0, 0, 0.25) 0px 0px 0px,
-      inset rgba(255, 255, 255, 0) 0px 1px 0px,
-      inset rgba(0, 0, 0, 0.5) 0px 0px 5px,
-      inset rgba(255, 255, 255, 0.05) 0px 15px 4px,
-      inset rgba(0, 0, 0, 0.15) 0px -20px 20px,
-      inset rgba(255, 255, 255, 0.05) 0px 20px 20px;
-
-    --text-shadow: 0px 1px 2px oklch(0 0 0 / 0.9);
-
-    box-shadow: var(--box-shadow);
-    text-shadow: var(--text-shadow);
-
-    svg {
-      filter: drop-shadow(var(--text-shadow));
-      height: 1.5em;
-      width: 1.5em;
-    }
 
     &:hover {
-      color: var(--color-text);
+      color: var(--text);
       box-shadow: var(--hover-box-shadow)
     }
 
     &:active {
       translate: 0 1px;
       box-shadow: var(--active-box-shadow);
+    }
+  }
+
+  hr {
+    margin: 0;
+    background-color: var(--accent-muted);
+    height: 1px;
+  }
+
+  a {
+    display: flex;
+    gap: var(--spacing-2xs);
+    align-items: center;
+    color: var(--text-muted);
+    text-shadow: var(--text-shadow);
+    font-family: var(--font-family);
+    cursor: pointer;
+
+    img {
+      cursor: pointer;
+      filter: drop-shadow(var(--text-shadow));
+      height: var(--spacing-xl);
+      width: var(--spacing-xl);
     }
   }
 
