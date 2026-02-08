@@ -3,14 +3,14 @@
         {
             "name": "Community Roadmap",
             "description": "Roadmap for Community related tools, services, templates, projects, and more.",
-            "link": "https://github.com/orgs/blazium-engine/projects/1",
+            "link": "https://github.com/orgs/blazium-games/projects/1",
             "image": "github_community.webp",
             "buttonText": "Have a look"
         },
         {
             "name": "Engine Roadmap",
             "description": "Roadmap for Engine features, fixes, enhancements, and general topics related to Blazium as a whole.",
-            "link": "https://github.com/orgs/blazium-engine/projects/2",
+            "link": "https://github.com/orgs/blazium-games/projects/2",
             "image": "github_engine.webp",
             "buttonText": "Have a look"
         }
