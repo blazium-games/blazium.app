@@ -562,6 +562,8 @@ func main() {
 	ServeFile(r, "sitemap.xml")
 	ServeFile(r, "robots.txt")
 	ServeFile(r, "llms.txt")
+	ServeFile(r, "humans.txt")
+
 
 	// Serve main.tmpl on the root path "/"
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
