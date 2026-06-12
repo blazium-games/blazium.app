@@ -1,0 +1,43 @@
+.main {
+  >section {
+    margin-top: var(--spacing-xs);
+    background-color: var(--color-bg);
+    border-radius: var(--card-border-radius);
+    border: var(--card-border);
+    padding: var(--spacing-xs);
+
+    div {
+      margin-top: var(--spacing-xs);
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-2xs);
+      border-radius: var(--spacing-3xs);
+    }
+
+    &:first-of-type>div {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    img {
+      border-radius: var(--card-border-radius);
+      border: var(--card-border);
+      background-image: conic-gradient(
+        var(--bg-1) 0deg 90deg,
+        var(--bg-2) 90deg 180deg,
+        var(--bg-1) 180deg 270deg,
+        var(--bg-2) 270deg 360deg);
+      background-position: top left;
+      background-size: 32px 32px;
+
+      &.dark_bg {
+        --bg-1: var(--color-bg-dark);
+        --bg-2: var(--color-bg);
+      }
+
+      &.light_bg {
+        --bg-1: var(--color-text);
+        --bg-2: var(--color-text-muted);
+      }
+    }
+  }
+}

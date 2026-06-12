@@ -1,0 +1,18 @@
+.main {
+  ul {
+    list-style: none;
+    display: flex;
+    gap: var(--spacing-2xs);
+    margin-top: var(--spacing-m);
+    flex-wrap: wrap;
+  }
+
+  p a {
+    text-decoration: underline dotted var(--color-accent);
+    color: var(--color-text-muted);
+
+    &:hover {
+      color: initial;
+    }
+  }
+}

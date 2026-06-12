@@ -1,0 +1,180 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  margin-bottom: var(--spacing-4xl);
+  color: var(--color-text-muted);
+  border-bottom: 1px solid oklch(from var(--color-bg-light) l c h / 0.5);
+  position: sticky;
+  top: var(--spacing-xs);
+  z-index: 100;
+  box-shadow: 0 4px 8px var(--color-bg-dark);
+
+  border: var(--card-border);
+  border-radius: var(--spacing-2xs);
+  padding: var(--spacing-xs);
+
+  background-image: var(--card-bg-transparent);
+  backdrop-filter: blur(2px);
+
+  nav {
+    display: flex;
+    align-items: center;
+
+    a:hover {
+      color: var(--color-text);
+    }
+  }
+
+  nav:first-of-type>a:first-of-type {
+    margin-right: var(--spacing-m);
+    color: var(--color-text);
+    font: var(--h5);
+
+    img {
+      vertical-align: bottom;
+      margin-right: var(--spacing-2xs);
+      width: var(--spacing-xl);
+      height: var(--spacing-xl);
+    }
+  }
+
+  a[class] {
+    --padding: var(--spacing-s);
+    padding: var(--padding);
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      transform-origin: center;
+      background-color: var(--color-accent);
+      margin-inline: auto;
+      height: 2px;
+      left: var(--padding);
+      bottom: var(--spacing-3xs);
+      width: calc(100% - calc(2 * var(--padding)));
+      transform: scaleX(0);
+      transition: transform 0.1s;
+    }
+  }
+
+  div:not(:hover) a[aria-current],
+  a[class]:is(:hover, :focus-visible) {
+    color: var(--color-text);
+
+    &::after {
+      transform: scaleX(100%);
+    }
+  }
+
+  >button {
+    display: none;
+  }
+
+  @media (width<1200px) {
+    top: 0;
+  }
+
+  @media (width<600px) {
+    >nav>div,
+    >nav:last-of-type {
+      display: none;
+    }
+
+    >button {
+      display: inline-flex;
+    }
+  }
+
+  >button,
+  dialog button {
+    padding: var(--spacing-3xs);
+    font-size: var(--font-s-h4);
+  }
+
+  dialog {
+    background-color: var(--color-bg-dark);
+    padding: var(--spacing-s) var(--spacing-xs);
+    height: 100%;
+    width: 100%;
+
+    button {
+      position: absolute;
+      right: var(--spacing-xs);
+      top: var(--spacing-xs);
+    }
+
+    nav {
+      display: grid;
+
+      a:nth-of-type(1) {
+        width: max-content;
+      }
+    }
+
+    nav~nav {
+      grid-template-columns: repeat(2, 1fr);
+
+      span {
+        grid-column: span 2;
+        font: var(--h6);
+        color: var(--color-text-muted);
+      }
+
+      a,
+      span {
+        padding: var(--spacing-xs);
+      }
+    }
+  }
+}
+
+.footer {
+  margin-top: var(--spacing-5xl);
+  color: var(--color-text-muted);
+
+  border-top: var(--card-border);
+  border-radius: var(--spacing-2xs);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding: var(--spacing-xs);
+  background-image: var(--card-bg);
+
+  h2 {
+    font: var(--h6);
+    letter-spacing: 1px;
+  }
+
+  a:hover {
+    color: var(--color-text);
+  }
+
+  nav {
+    padding: var(--spacing-xs);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: var(--spacing-m) var(--spacing-4xl);
+
+    @media (width<640px) {
+      flex-direction: column;
+    }
+
+    div {
+      display: grid;
+      gap: var(--spacing-xs) var(--spacing-m);
+
+      &:last-of-type h2 {
+        grid-area: auto / span 2;
+      }
+    }
+  }
+
+  small {
+    opacity: 0.3;
+    width: fit-content;
+  }
+}

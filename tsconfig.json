@@ -1,0 +1,62 @@
+{
+  "include": [
+    "**/*",
+    "**/.server/**/*",
+    "**/.client/**/*",
+    ".react-router/types/**/*"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "DOM",
+      "ES2022"
+    ],
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "rootDirs": [
+      ".",
+      "./.react-router/types"
+    ],
+    "paths": {
+      "~/*": [
+        "./app/*"
+      ],
+      "css/*": [
+        "./app/css/*"
+      ],
+      "comps/*": [
+        "./app/components/*"
+      ],
+      "md/*": [
+        "./app/markdown/*"
+      ],
+      "data/*": [
+        "./app/data/*"
+      ],
+    },
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "moduleDetection": "force",
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "erasableSyntaxOnly": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noUncheckedSideEffectImports": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitOverride": true,
+    "noErrorTruncation": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+  }
+}
