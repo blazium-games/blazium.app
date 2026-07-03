@@ -1,7 +1,7 @@
 {
-    "name": "Blazium Release 0.5.246",
-    "description": "This marks the last release based on Godot 4.3 and will serve as the future Long-Term Support (LTS) version once the next 4.6-based release arrives.",
-    "link": "https://www.indiedb.com/engines/blazium-engine/news/blazium-release-05246",
+    "name": "Release 0.6.725",
+    "description": "A major update introducing new modules, workflow improvements, tooling integrations, and performance optimizations across the engine.",
+    "link": "https://www.indiedb.com/engines/blazium-engine/news/blazium-game-engine-release-06725",
     "image": "/static/assets/release_card.jpg",
     "buttonText": "Read the article"
 }
