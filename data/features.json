@@ -1,10 +1,5 @@
 [
     {
-        "name": "Blazium Services",
-        "description": "Seamlessly integrate with our suite of services using dedicated nodes for each, streamlining game development with features like multiplayer, authentication, and more. Designed to be scalable, lightweight, and compatible across all platforms. <a href='/dev-tools/blazium-services'>Click here to learn more</a>.",
-        "link": "blazium-sdk"
-    },
-    {
         "name": "Discord applications",
         "description": "Use the <code>DiscordEmbededAppClient</code> node to seamlessly interface with Discord, simplifying the creation of Activities.",
         "link": "blazium-sdk"
