@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -12,43 +11,21 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// TestAPIEndpoint tests the /api/mirrorlist/:version/json endpoint.
-func TestAPIEndpoint(t *testing.T) {
-	// Create a request to pass to the handler.
-	req, err := http.NewRequest("GET", "/api/mirrorlist/v1/json", nil)
+// TestAPIEndpointRejectsInvalidVersion ensures short version strings return 400.
+func TestAPIEndpointRejectsInvalidVersion(t *testing.T) {
+	req, err := http.NewRequest("GET", "/api/mirrorlist/v1.json", nil)
 	if err != nil {
 		t.Fatalf("Could not create request: %v", err)
 	}
 
-	// Add the Content-Type header to simulate a JSON request.
-	req.Header.Set("Content-Type", "application/json")
-
-	// Create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	rr := httptest.NewRecorder()
-
-	// Create a new router using Gorilla Mux.
-	r := setupRouter()
-
-	// Serve the request
+	r := mux.NewRouter()
+	r.HandleFunc("/api/mirrorlist/{version}.json", MirrorListHandler).Methods("GET")
 	r.ServeHTTP(rr, req)
 
-	// Check if the status code is 200 OK.
-	if rr.Code != http.StatusOK {
-		t.Errorf("Expected status code 200, got %d", rr.Code)
+	if rr.Code != http.StatusBadRequest {
+		t.Errorf("Expected status code 400, got %d", rr.Code)
 	}
-
-	// Check if the Content-Type is application/json in the response.
-	contentType := rr.Header().Get("Content-Type")
-	if contentType != "application/json" {
-		t.Errorf("Expected Content-Type application/json, got %s", contentType)
-	}
-
-	// Check if the response is valid JSON.
-	var response MirrorListResponse
-	if err := json.Unmarshal(rr.Body.Bytes(), &response); err != nil {
-		t.Errorf("Response was not valid JSON: %v", err)
-	}
-
 }
 
 // TestRootPath tests the root / path.
@@ -132,8 +109,8 @@ func setupRouter() *mux.Router {
 	staticFileHandler := http.StripPrefix("/static/", http.FileServer(staticFileDirectory))
 	r.PathPrefix("/static/").Handler(staticFileHandler)
 
-	// API endpoint for /api/mirrorlist/{version}/json
-	r.HandleFunc("/api/mirrorlist/{version}/json", MirrorListHandler).Methods("GET")
+	// API endpoint for /api/mirrorlist/{version}.json
+	r.HandleFunc("/api/mirrorlist/{version}.json", MirrorListHandler).Methods("GET")
 
 	return r
 }

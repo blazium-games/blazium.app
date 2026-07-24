@@ -49,59 +49,37 @@ type Checksum struct {
 	SHA256 string `json:"256"`
 }
 
-// https://cdn.blazium.app/nightly/0.2.4/templates.json
-
+// MirrorListHandler serves Godot/Blazium Export Template Manager mirror metadata.
+// Prefer CDN details.json (bundle schema). Fall back to legacy templates.json when it
+// is still the {base,mono} bundle format (not the per-file Cerebro array).
 func MirrorListHandler(w http.ResponseWriter, r *http.Request) {
-	// Extract the version from the URL
 	vars := mux.Vars(r)
 	version := vars["version"]
 
-	// Split the version string
 	versionParts := strings.Split(version, ".")
 	if len(versionParts) < 4 {
 		http.Error(w, "Invalid version format", http.StatusBadRequest)
 		return
 	}
 
-	// Determine base version and version type
 	baseVersion := strings.Join(versionParts[0:3], ".")
 	versionType := versionParts[3]
 
-	// Construct the details.json URL
-	url := fmt.Sprintf("https://cdn.blazium.app/%s/%s/templates.json", versionType, baseVersion)
-
-	// Make a HEAD request to check if details.json exists
-	resp, err := http.Head(url)
-	if err != nil || resp.StatusCode != http.StatusOK {
-		// If the file doesn't exist, return an empty response
-		emptyResponse := MirrorListResponse{Version: version}
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(emptyResponse)
-		return
-	}
-
-	// Get the details.json file
-	resp, err = http.Get(url)
-	if err != nil || resp.StatusCode != http.StatusOK {
-		http.Error(w, "Failed to fetch details.json", http.StatusInternalServerError)
-		return
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
+	details, found, err := fetchBundleDetails(versionType, baseVersion)
 	if err != nil {
-		http.Error(w, "Failed to read details.json", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !found {
+		emptyResponse := MirrorListResponse{
+			Version: version,
+			Mirrors: []MirrorEntry{},
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(emptyResponse)
 		return
 	}
 
-	// Parse details.json
-	var details FileDetails
-	if err := json.Unmarshal(body, &details); err != nil {
-		http.Error(w, "Failed to parse details.json", http.StatusInternalServerError)
-		return
-	}
-
-	// Determine whether to use Mono or Base based on the version suffix
 	var fileInfo FileInfo
 	if len(versionParts) > 4 && versionParts[4] == "mono" {
 		fileInfo = details.Mono
@@ -109,35 +87,86 @@ func MirrorListHandler(w http.ResponseWriter, r *http.Request) {
 		fileInfo = details.Base
 	}
 
-	// Populate the MirrorListResponse
 	mirrorList := MirrorListResponse{
 		Version:   version,
 		Timestamp: fileInfo.Timestamp,
+		Mirrors:   make([]MirrorEntry, 0, 1+len(fileInfo.Mirrors)),
 	}
 
-	// Add Base or Mono as the first MirrorEntry
-	baseOrMonoEntry := MirrorEntry{
-		Name:     fileInfo.Name,
-		Url:      fileInfo.URL,
-		Checksum: fileInfo.Checksum,
-		Filesize: fileInfo.Filesize,
+	if fileInfo.Name != "" || fileInfo.URL != "" {
+		mirrorList.Mirrors = append(mirrorList.Mirrors, MirrorEntry{
+			Name:     fileInfo.Name,
+			Url:      fileInfo.URL,
+			Checksum: fileInfo.Checksum,
+			Filesize: fileInfo.Filesize,
+		})
 	}
-	mirrorList.Mirrors = append(mirrorList.Mirrors, baseOrMonoEntry)
 
-	// Add any additional mirror entries
-	if len(fileInfo.Mirrors) > 0 {
-		for _, mirror := range fileInfo.Mirrors {
-			mirrorEntry := MirrorEntry{
-				Name:     mirror.Name,
-				Url:      mirror.URL,
-				Checksum: mirror.Checksum,
-				Filesize: mirror.Filesize,
-			}
-			mirrorList.Mirrors = append(mirrorList.Mirrors, mirrorEntry)
+	for _, mirror := range fileInfo.Mirrors {
+		if mirror.URL == "" {
+			continue
+		}
+		mirrorList.Mirrors = append(mirrorList.Mirrors, MirrorEntry{
+			Name:     mirror.Name,
+			Url:      mirror.URL,
+			Checksum: mirror.Checksum,
+			Filesize: mirror.Filesize,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(mirrorList)
+}
+
+func fetchBundleDetails(versionType, baseVersion string) (FileDetails, bool, error) {
+	candidates := []string{
+		fmt.Sprintf("https://cdn.blazium.app/%s/%s/details.json", versionType, baseVersion),
+		fmt.Sprintf("https://cdn.blazium.app/%s/%s/templates.json", versionType, baseVersion),
+	}
+	for _, url := range candidates {
+		details, found, err := tryFetchBundleDetails(url)
+		if err != nil {
+			return FileDetails{}, false, err
+		}
+		if found {
+			return details, true, nil
 		}
 	}
+	return FileDetails{}, false, nil
+}
 
-	// Return the response
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(mirrorList)
+func tryFetchBundleDetails(url string) (FileDetails, bool, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return FileDetails{}, false, fmt.Errorf("failed to fetch %s: %w", url, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return FileDetails{}, false, nil
+	}
+	if resp.StatusCode != http.StatusOK {
+		return FileDetails{}, false, fmt.Errorf("failed to fetch %s: status %d", url, resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return FileDetails{}, false, fmt.Errorf("failed to read %s: %w", url, err)
+	}
+
+	trimmed := strings.TrimSpace(string(body))
+	if trimmed == "" || strings.HasPrefix(trimmed, "[") {
+		// Missing or per-file Cerebro array — not the Godot bundle schema.
+		return FileDetails{}, false, nil
+	}
+
+	var details FileDetails
+	if err := json.Unmarshal(body, &details); err != nil {
+		return FileDetails{}, false, nil
+	}
+	if details.Base.URL == "" && details.Base.Filename == "" &&
+		details.Mono.URL == "" && details.Mono.Filename == "" {
+		return FileDetails{}, false, nil
+	}
+	return details, true, nil
 }
