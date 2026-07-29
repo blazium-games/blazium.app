@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 )
@@ -72,176 +73,165 @@ var (
 	editorFilesDownloads EditorFilesDownloads
 )
 
-func fetchCerebroTools(toolType string, osType string) ([]ToolData, error) {
-	cerebroURL := os.Getenv("CEREBRO_URL")
-	blaziumAuth := os.Getenv("BLAZIUM_AUTH")
-
-	if cerebroURL == "" || blaziumAuth == "" {
-		return nil, errors.New("CEREBRO_URL or BLAZIUM_AUTH environment variable is not set")
+func cdnPublicBase() string {
+	base := strings.TrimSpace(os.Getenv("CDN_PUBLIC_BASE"))
+	if base == "" {
+		base = "https://cdn.blazium.app"
 	}
-
-	url := fmt.Sprintf("%s/api/v1/tools/%s/%s", cerebroURL, toolType, osType)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("BLAZIUM_AUTH", blaziumAuth)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to make request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non-200 response: %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	var apiResponse []ToolData
-	if err := json.Unmarshal(body, &apiResponse); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
-	}
-
-	return apiResponse, nil
+	return strings.TrimRight(base, "/")
 }
 
-func fetchCerebroVersions(buildType string) ([]VersionData, error) {
-	cerebroURL := os.Getenv("CEREBRO_URL")
-	blaziumAuth := os.Getenv("BLAZIUM_AUTH")
-
-	if cerebroURL == "" || blaziumAuth == "" {
-		return nil, errors.New("CEREBRO_URL or BLAZIUM_AUTH environment variable is not set")
-	}
-
-	url := fmt.Sprintf("%s/api/v1/versions/%s", cerebroURL, buildType)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
-	}
-
-	req.Header.Set("BLAZIUM_AUTH", blaziumAuth)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
+func fetchCDNJSON(url string) ([]byte, error) {
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make request: %w", err)
 	}
 	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("non-200 response: %d", resp.StatusCode)
 	}
-
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
+	return body, nil
+}
 
+type cdnToolDownload struct {
+	Platform    string `json:"platform"`
+	Arch        string `json:"arch"`
+	Filename    string `json:"filename"`
+	DownloadURL string `json:"download_url"`
+	SigURL      string `json:"sig_url"`
+	Sha256      string `json:"sha256"`
+	Size        int64  `json:"size"`
+	Signing     string `json:"signing"`
+}
+
+type cdnToolVersion struct {
+	ReleasedOn string            `json:"released_on"`
+	Downloads  []cdnToolDownload `json:"downloads"`
+}
+
+type cdnToolManifest struct {
+	Latest     string                    `json:"latest"`
+	ReleasedOn string                    `json:"released_on"`
+	Versions   map[string]cdnToolVersion `json:"versions"`
+}
+
+func loadToolManifest(toolType string) (*cdnToolManifest, error) {
+	url := fmt.Sprintf("%s/catalog/tools/%s/manifest.json", cdnPublicBase(), toolType)
+	body, err := fetchCDNJSON(url)
+	if err != nil {
+		return nil, err
+	}
+	var doc cdnToolManifest
+	if err := json.Unmarshal(body, &doc); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
+	}
+	if doc.Versions == nil {
+		doc.Versions = map[string]cdnToolVersion{}
+	}
+	return &doc, nil
+}
+
+func toolDataFromDownload(toolType, version string, d cdnToolDownload) ToolData {
+	name := "Blazium Tool"
+	if strings.EqualFold(toolType, "cli") {
+		name = "Blazium CLI"
+	}
+	return ToolData{
+		Name:    name,
+		Type:    toolType,
+		Version: version,
+		OS:      d.Platform,
+		File:    d.DownloadURL,
+		Sig:     d.SigURL,
+	}
+}
+
+// fetchCerebroTools loads tool rows for an OS from the CDN tool manifest.
+func fetchCerebroTools(toolType string, osType string) ([]ToolData, error) {
+	doc, err := loadToolManifest(toolType)
+	if err != nil {
+		return nil, err
+	}
+	wantOS := strings.ToLower(strings.TrimSpace(osType))
+	var out []ToolData
+	for version, entry := range doc.Versions {
+		for _, d := range entry.Downloads {
+			if wantOS != "" && strings.ToLower(d.Platform) != wantOS {
+				continue
+			}
+			out = append(out, toolDataFromDownload(toolType, version, d))
+		}
+	}
+	return out, nil
+}
+
+// fetchCerebroVersions loads grouped version history from CDN.
+func fetchCerebroVersions(buildType string) ([]VersionData, error) {
+	url := fmt.Sprintf("%s/catalog/versions/%s/grouped.json", cdnPublicBase(), buildType)
+	body, err := fetchCDNJSON(url)
+	if err != nil {
+		return nil, err
+	}
 	var apiResponse VersionResponse
 	if err := json.Unmarshal(body, &apiResponse); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
 	}
-
 	if !apiResponse.Success || apiResponse.Data == nil {
+		// Also accept a bare array of VersionData.
+		var bare []VersionData
+		if err := json.Unmarshal(body, &bare); err == nil {
+			return bare, nil
+		}
 		return []VersionData{}, nil
 	}
-
 	return apiResponse.Data, nil
 }
 
+// fetchCerebroToolData resolves one tool version/OS from the CDN manifest.
 func fetchCerebroToolData(toolType string, osType string, toolVersion string) (*ToolData, error) {
-	cerebroURL := os.Getenv("CEREBRO_URL")
-	blaziumAuth := os.Getenv("BLAZIUM_AUTH")
-
-	if cerebroURL == "" || blaziumAuth == "" {
-		return nil, errors.New("CEREBRO_URL or BLAZIUM_AUTH environment variable is not set")
-	}
-
-	url := fmt.Sprintf("%s/api/v1/tools/%s/%s/%s", cerebroURL, toolType, osType, toolVersion)
-
-	req, err := http.NewRequest("GET", url, nil)
+	doc, err := loadToolManifest(toolType)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		return nil, err
 	}
-
-	req.Header.Set("BLAZIUM_AUTH", blaziumAuth)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to make request: %w", err)
+	entry, ok := doc.Versions[toolVersion]
+	if !ok {
+		return nil, errors.New("tool version not found")
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non-200 response: %d", resp.StatusCode)
+	wantOS := strings.ToLower(strings.TrimSpace(osType))
+	for _, d := range entry.Downloads {
+		if wantOS != "" && strings.ToLower(d.Platform) != wantOS {
+			continue
+		}
+		td := toolDataFromDownload(toolType, toolVersion, d)
+		return &td, nil
 	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	var apiResponse ToolData
-	if err := json.Unmarshal(body, &apiResponse); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
-	}
-
-	return &apiResponse, nil
+	return nil, errors.New("tool not found for OS")
 }
 
+// fetchCerebroVersionData loads the flat version catalog from CDN.
 func fetchCerebroVersionData(buildType string) ([]VersionPayload, error) {
-	cerebroURL := os.Getenv("CEREBRO_URL")
-	blaziumAuth := os.Getenv("BLAZIUM_AUTH")
-
-	if cerebroURL == "" || blaziumAuth == "" {
-		return nil, errors.New("CEREBRO_URL or BLAZIUM_AUTH environment variable is not set")
-	}
-
-	url := fmt.Sprintf("%s/api/v1/data/versions/%s", cerebroURL, buildType)
-
-	req, err := http.NewRequest("GET", url, nil)
+	url := fmt.Sprintf("%s/catalog/versions/%s.json", cdnPublicBase(), buildType)
+	body, err := fetchCDNJSON(url)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request: %w", err)
+		return nil, err
 	}
-
-	req.Header.Set("BLAZIUM_AUTH", blaziumAuth)
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to make request: %w", err)
+	var versionsData []VersionPayload
+	if err := json.Unmarshal(body, &versionsData); err != nil {
+		// Compat: wrapped {success,data} shape.
+		var apiResponse ResponsePayload
+		if err2 := json.Unmarshal(body, &apiResponse); err2 != nil {
+			return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
+		}
+		if !apiResponse.Success || apiResponse.Data == nil {
+			return []VersionPayload{}, nil
+		}
+		return apiResponse.Data, nil
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("non-200 response: %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	var apiResponse ResponsePayload
-	if err := json.Unmarshal(body, &apiResponse); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON: %w", err)
-	}
-
-	if !apiResponse.Success || apiResponse.Data == nil {
-		return []VersionPayload{}, nil
-	}
-
-	return apiResponse.Data, nil
+	return versionsData, nil
 }
 
 // updateCache reads the options the JSON file
