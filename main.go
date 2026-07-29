@@ -309,7 +309,7 @@ func ChangelogHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url := "https://cdn.blazium.app/" + buildType + "/" + version + "/changelog.html"
+	url := cdnPublicBase() + "/" + buildType + "/" + version + "/changelog.html"
 	resp, err := http.Get(url)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error getting changelog: %v", err), http.StatusInternalServerError)
@@ -372,7 +372,7 @@ func EditorFilesShaHandler(w http.ResponseWriter, r *http.Request) {
 	buildType := vars["buildType"]
 	version := vars["version"]
 
-	url := "https://cdn.blazium.app/" + buildType + "/" + version + "/editors.json"
+	url := cdnPublicBase() + "/" + buildType + "/" + version + "/editors.json"
 	resp, err := http.Get(url)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error getting editor files data: %v", err), http.StatusInternalServerError)
@@ -428,7 +428,7 @@ func TemplatesFilesShaHandler(w http.ResponseWriter, r *http.Request) {
 	buildType := vars["buildType"]
 	version := vars["version"]
 
-	url := "https://cdn.blazium.app/" + buildType + "/" + version + "/templates.json"
+	url := cdnPublicBase() + "/" + buildType + "/" + version + "/templates.json"
 	resp, err := http.Get(url)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error getting templates files data: %v", err), http.StatusInternalServerError)
@@ -513,7 +513,7 @@ func EditorDownloadHandler(w http.ResponseWriter, r *http.Request) {
 	version := vars["version"]
 	fileName := vars["fileName"]
 
-	url := "https://cdn.blazium.app/" + buildType + "/" + version + "/" + fileName
+	url := cdnPublicBase() + "/" + buildType + "/" + version + "/" + fileName
 
 	if editorFilesDownloads[buildType] == nil {
 		editorFilesDownloads[buildType] = make(map[string]map[string]int)

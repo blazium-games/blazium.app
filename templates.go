@@ -119,9 +119,10 @@ func MirrorListHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchBundleDetails(versionType, baseVersion string) (FileDetails, bool, error) {
+	base := cdnPublicBase()
 	candidates := []string{
-		fmt.Sprintf("https://cdn.blazium.app/%s/%s/details.json", versionType, baseVersion),
-		fmt.Sprintf("https://cdn.blazium.app/%s/%s/templates.json", versionType, baseVersion),
+		fmt.Sprintf("%s/%s/%s/details.json", base, versionType, baseVersion),
+		fmt.Sprintf("%s/%s/%s/templates.json", base, versionType, baseVersion),
 	}
 	for _, url := range candidates {
 		details, found, err := tryFetchBundleDetails(url)

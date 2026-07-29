@@ -347,6 +347,8 @@ function handleEditorDownload(content) {
     return ["release", "pre-release", "nightly"].filter((t) => t in versions);
   }
 
+  let cdnBase = "https://cdn.blazium.app";
+
   // Fetch and populate dropdowns
   fetchOptions("/api/download-options/editor").then(data => {
     if (!data) return; // Exit if fetch failed
@@ -354,6 +356,9 @@ function handleEditorDownload(content) {
     versions = data.versions;
     options = data.options;
     commands = data.commands;
+    if (data.cdn_base) {
+      cdnBase = String(data.cdn_base).replace(/\/$/, "");
+    }
 
     const dropdowns = content.querySelectorAll(".dropdown");
     dropdowns.forEach(dropdown => {
@@ -399,7 +404,7 @@ function handleEditorDownload(content) {
 
         const href = element.getAttribute("href");
         const s = href.split("/").reverse();
-        const url = `https://cdn.blazium.app/${s[2]}/${s[1]}/${s[0]}`;
+        const url = `${cdnBase}/${s[2]}/${s[1]}/${s[0]}`;
         try {
           const response = await fetch(url, { method: "HEAD"});
           if (response.status === 404) {
@@ -468,6 +473,8 @@ async function fetchOptions(url) {
 function handleToolsDownload(content) {
   var toolsVersions;
   var toolsNames;
+  var toolsFiles = {};
+  var cdnBase = "https://cdn.blazium.app";
 
   // Helper function to set links and text after selecting an option
   const setLinks = (firstLoad=false) => {
@@ -522,7 +529,13 @@ function handleToolsDownload(content) {
         os = "darwin"
       }
 
-      downloadButton.href = `https://cdn.blazium.app/${toolsNames[tool]}/${os}/${version}/${toolName}${isExe}`
+      const toolType = toolsNames[tool];
+      const catalogURL = toolsFiles?.[toolType]?.[os]?.[version];
+      if (catalogURL) {
+        downloadButton.href = catalogURL;
+      } else {
+        downloadButton.href = `${cdnBase}/${toolType}/${os}/${version}/${toolName}${isExe}`;
+      }
 
       const buttonLabel = downloadButton.querySelector("span");
       if (buttonLabel) {
@@ -624,6 +637,10 @@ function handleToolsDownload(content) {
 
     toolsVersions = data.versions;
     toolsNames = data.names;
+    toolsFiles = data.files || {};
+    if (data.cdn_base) {
+      cdnBase = String(data.cdn_base).replace(/\/$/, "");
+    }
 
     const dropdowns = content.querySelectorAll(".dropdown");
     dropdowns.forEach(dropdown => {

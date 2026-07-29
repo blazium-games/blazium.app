@@ -9,7 +9,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"slices"
+	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -50,12 +51,15 @@ type EditorDownloadOptions struct {
 	Versions map[string][]string `json:"versions"`
 	Options  map[string][]string `json:"options"`
 	Commands map[string]string   `json:"commands"`
+	CDNBase  string              `json:"cdn_base"`
 }
 
 type ToolsDownloadOptions struct {
-	Versions map[string][]string `json:"versions"`
-	Names    map[string]string   `json:"names"`
-	Os       []string            `json:"os"`
+	Versions map[string][]string                       `json:"versions"`
+	Names    map[string]string                         `json:"names"`
+	Os       []string                                  `json:"os"`
+	CDNBase  string                                    `json:"cdn_base"`
+	Files    map[string]map[string]map[string]string   `json:"files"` // tool -> os -> version -> download_url
 }
 
 type EditorFilesDownloads map[string]map[string]map[string]int
@@ -234,11 +238,21 @@ func fetchCerebroVersionData(buildType string) ([]VersionPayload, error) {
 	return versionsData, nil
 }
 
+func versionListCount(versions map[string][]string) int {
+	n := 0
+	for _, list := range versions {
+		n += len(list)
+	}
+	return n
+}
+
 // updateCache reads the options the JSON file
 // and adds the available versions.
 func updateCache() {
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
+
+	cdnBase := cdnPublicBase()
 
 	// Update editor download options cache
 	var fileEditorOptions struct {
@@ -253,16 +267,25 @@ func updateCache() {
 		return
 	}
 
-	versionsJson, err := getEditorVersions()
+	editorVersions, err := getEditorVersions()
 	if err != nil {
-		log.Printf("Error fetching versions: %v", err)
-		return
+		log.Printf("Error fetching editor versions: %v", err)
+		editorVersions = nil
 	}
-
+	if versionListCount(editorVersions) == 0 &&
+		editorDownloadOptionsCache != nil &&
+		versionListCount(editorDownloadOptionsCache.Versions) > 0 {
+		log.Printf("warning: editor catalog empty; keeping previous version list")
+		editorVersions = editorDownloadOptionsCache.Versions
+	}
+	if editorVersions == nil {
+		editorVersions = map[string][]string{}
+	}
 	editorDownloadOptionsCache = &EditorDownloadOptions{
-		Versions: versionsJson,
+		Versions: editorVersions,
 		Options:  fileEditorOptions.Options,
 		Commands: fileEditorOptions.Commands,
+		CDNBase:  cdnBase,
 	}
 
 	// Update tools download options cache
@@ -283,16 +306,31 @@ func updateCache() {
 		tools = append(tools, value)
 	}
 
-	versionsJson, err = getToolsVersions(tools)
+	toolVersions, toolFiles, err := getToolsCatalog(tools)
 	if err != nil {
-		log.Printf("Error fetching versions: %v", err)
-		return
+		log.Printf("Error fetching tool versions: %v", err)
+		toolVersions = nil
+		toolFiles = nil
 	}
-
+	if versionListCount(toolVersions) == 0 &&
+		toolsDownloadOptionsCache != nil &&
+		versionListCount(toolsDownloadOptionsCache.Versions) > 0 {
+		log.Printf("warning: tools catalog empty; keeping previous version list")
+		toolVersions = toolsDownloadOptionsCache.Versions
+		toolFiles = toolsDownloadOptionsCache.Files
+	}
+	if toolVersions == nil {
+		toolVersions = map[string][]string{}
+	}
+	if toolFiles == nil {
+		toolFiles = map[string]map[string]map[string]string{}
+	}
 	toolsDownloadOptionsCache = &ToolsDownloadOptions{
-		Versions: versionsJson,
+		Versions: toolVersions,
 		Names:    fileToolsOptions.Names,
 		Os:       fileToolsOptions.Os,
+		CDNBase:  cdnBase,
+		Files:    toolFiles,
 	}
 
 	// Update editor file analytics
@@ -318,61 +356,141 @@ func startCacheUpdater() {
 	}
 }
 
+// compareVersionsDesc reports whether a should sort before b (newest first).
+func compareVersionsDesc(a, b string) bool {
+	ap := strings.Split(a, ".")
+	bp := strings.Split(b, ".")
+	n := len(ap)
+	if len(bp) > n {
+		n = len(bp)
+	}
+	for i := 0; i < n; i++ {
+		var ai, bi int
+		if i < len(ap) {
+			ai, _ = strconv.Atoi(ap[i])
+		}
+		if i < len(bp) {
+			bi, _ = strconv.Atoi(bp[i])
+		}
+		if ai != bi {
+			return ai > bi
+		}
+	}
+	return a > b
+}
+
 // getEditorVersions fetches the version data for all build types
 // and returns them in more manageable format.
+// Missing channels (e.g. pre-release 404) are skipped; they do not wipe other channels.
 func getEditorVersions() (map[string][]string, error) {
 	versions := make(map[string][]string)
 	buildTypes := []string{"nightly", "pre-release", "release"}
+	useLocal := len(os.Args) > 1 && os.Args[1] == "--local"
 
-	var versionsData []VersionPayload
-	var err error
 	for _, buildType := range buildTypes {
-		if len(os.Args) > 1 {
-			if os.Args[1] == "--local" {
-				versionsData, err = localEditorVersions(buildType)
-			}
+		var versionsData []VersionPayload
+		var err error
+		if useLocal {
+			versionsData, err = localEditorVersions(buildType)
 		} else {
 			versionsData, err = fetchCerebroVersionData(buildType)
 		}
 		if err != nil {
-			log.Printf("Error loading editor versions: %v", err)
-			return map[string][]string{}, nil
+			log.Printf("Error loading editor versions for %s: %v (skipping channel)", buildType, err)
+			continue
 		}
+		list := make([]string, 0, len(versionsData))
 		for _, version := range versionsData {
-			versions[buildType] = append(versions[buildType], version.Version)
+			if version.Version == "" {
+				continue
+			}
+			list = append(list, version.Version)
 		}
+		if len(list) == 0 {
+			continue
+		}
+		versions[buildType] = list
 	}
 	return versions, nil
 }
 
-// getToolsVersions fetches the version data for all build types
-// and returns them in more manageable format.
-func getToolsVersions(tools []string) (map[string][]string, error) {
+// getToolsCatalog loads tool version lists and per-OS download URLs from CDN manifests.
+// Missing tool manifests are skipped without clearing other tools.
+func getToolsCatalog(tools []string) (map[string][]string, map[string]map[string]map[string]string, error) {
 	versions := make(map[string][]string)
+	files := make(map[string]map[string]map[string]string)
+	useLocal := len(os.Args) > 1 && os.Args[1] == "--local"
 
-	var versionsData []ToolData
-	var err error
 	for _, tool := range tools {
-		if len(os.Args) > 1 {
-			if os.Args[1] == "--local" {
-				versionsData, err = localToolsVersions(tool, "windows")
+		if useLocal {
+			versionsData, err := localToolsVersions(tool, "windows")
+			if err != nil {
+				log.Printf("Error loading tool versions for %s: %v (skipping)", tool, err)
+				continue
 			}
-		} else {
-			versionsData, err = fetchCerebroTools(tool, "windows")
+			seen := map[string]bool{}
+			list := make([]string, 0, len(versionsData))
+			for _, row := range versionsData {
+				if row.Version == "" || seen[row.Version] {
+					continue
+				}
+				seen[row.Version] = true
+				list = append(list, row.Version)
+				osName := strings.ToLower(row.OS)
+				if osName == "" {
+					osName = "windows"
+				}
+				if files[tool] == nil {
+					files[tool] = make(map[string]map[string]string)
+				}
+				if files[tool][osName] == nil {
+					files[tool][osName] = make(map[string]string)
+				}
+				if row.File != "" {
+					files[tool][osName][row.Version] = row.File
+				}
+			}
+			sort.Slice(list, func(i, j int) bool { return compareVersionsDesc(list[i], list[j]) })
+			if len(list) > 0 {
+				versions[tool] = list
+			}
+			continue
 		}
+
+		doc, err := loadToolManifest(tool)
 		if err != nil {
-			log.Printf("Error loading tool versions: %v", err)
-			return map[string][]string{}, nil
+			log.Printf("Error loading tool manifest for %s: %v (skipping)", tool, err)
+			continue
 		}
-		for _, version := range versionsData {
-			versions[tool] = append(versions[tool], version.Version)
+		list := make([]string, 0, len(doc.Versions))
+		for version, entry := range doc.Versions {
+			list = append(list, version)
+			if files[tool] == nil {
+				files[tool] = make(map[string]map[string]string)
+			}
+			for _, d := range entry.Downloads {
+				osName := strings.ToLower(strings.TrimSpace(d.Platform))
+				if osName == "" || d.DownloadURL == "" {
+					continue
+				}
+				if files[tool][osName] == nil {
+					files[tool][osName] = make(map[string]string)
+				}
+				files[tool][osName][version] = d.DownloadURL
+			}
+		}
+		sort.Slice(list, func(i, j int) bool { return compareVersionsDesc(list[i], list[j]) })
+		if len(list) > 0 {
+			versions[tool] = list
 		}
 	}
-	for i, versionList := range versions {
-		slices.Reverse(versionList)
-		versions[i] = versionList
-	}
-	return versions, nil
+	return versions, files, nil
+}
+
+// getToolsVersions fetches tool version lists (legacy helper used by tests).
+func getToolsVersions(tools []string) (map[string][]string, error) {
+	versions, _, err := getToolsCatalog(tools)
+	return versions, err
 }
 
 // Used for local editor versions fetch
