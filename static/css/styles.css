@@ -35,14 +35,14 @@
   --secondary-font: 'Poppins', sans-serif;
   --code-font: 'JetBrains Mono', monospace;
 
-  --h1: bold 4rem/1em var(--main-font);
-  --h2: bold 3rem/1.2em var(--main-font);
-  --h3: bold 2.25rem/1.3em var(--main-font);
-  --h4: bold 1.5rem/1.3em var(--main-font);
+  --h1: bold 2.50rem/1em var(--main-font);
+  --h2: bold 2.00rem/1.2em var(--main-font);
+  --h3: bold 1.75rem/1.3em var(--main-font);
+  --h4: bold 1.25rem/1.3em var(--main-font);
 
   --p-small: normal 0.75rem/2em var(--secondary-font);
-  --p: normal 1.1rem/1.4em var(--secondary-font);
-  --p-big: normal 1.25rem/1.6em var(--secondary-font);
+  --p: normal 1.0rem/1.3em var(--secondary-font);
+  --p-big: normal 1.13rem/1.6em var(--secondary-font);
 
   --grain: url("/static/assets/grain.webp");
 
@@ -121,7 +121,7 @@ p {
 
 a {
   text-decoration: none;
-  font: var(--p-big);
+  font: var(--p);
   color: var(--gray-80);
   transition: color 0.3s ease;
 }
@@ -397,9 +397,10 @@ i.align:before {
   text-decoration: none;
   cursor: pointer;
   background-color: var(--accent-color);
-  padding: var(--margin-xs) var(--margin-s);
-  border-radius: 16px;
-  font: var(--h4);
+  padding: var(--margin-xxs) var(--margin-s);
+  border-radius: 8px;
+  font: var(--p);
+  font-weight: bold;
   color: white;
   border: 2px solid var(--accent-color);
   transition: background-color 0.3s ease;
@@ -465,7 +466,7 @@ i.align:before {
   position: relative;
   display: inline-block;
   min-width: max-content;
-  font: var(--p-big);
+  font: var(--p);
 }
 
 .dropdown-button,
@@ -621,13 +622,13 @@ i.align:before {
 
 .card-grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: var(--margin-s);
   margin-block: var(--margin-l);
 }
 
 .card-grid-container.fill {
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 
   .card {
     aspect-ratio: 4/3;
@@ -638,7 +639,7 @@ i.align:before {
   margin-bottom: var(--margin-l);
 
   p {
-    font: var(--p-big);
+    font: var(--p);
     margin-top: var(--margin-l);
   }
 
@@ -660,7 +661,7 @@ i.align:before {
     }
 
     p {
-      font: var(--p-big);
+      font: var(--p);
       margin-bottom: var(--margin-xl);
     }
   }
@@ -671,8 +672,8 @@ i.align:before {
 
     img,
     video {
-      max-height: 42em;
-      max-width: 75vw;
+      max-height: 32em;
+      max-width: 55vw;
       margin-left: auto;
       display: block;
 
@@ -738,6 +739,49 @@ i.align:before {
 }
 
 /* blog article styling*/
+.blog-article-card {
+  background-color: var(--primary-color);
+  padding: var(--margin-xxs);
+  border-radius: 4px;
+  max-width: 90vw;
+
+  img {
+    max-width: 100%;
+    aspect-ratio: 2;
+    object-fit: contain;
+  }
+
+  h2 {
+    font: var(--h4);
+  }
+}
+
+.blog-article-header {
+  margin-bottom: var(--margin-xxl);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--margin-xxl) var(--margin-m);
+
+  img {
+    max-width: 100%;
+    aspect-ratio: 2;
+    object-fit: contain;
+  }
+
+  >div {
+    grid-column: 2;
+    align-self: center;
+
+    >span {
+      display: block;
+    }
+  }
+
+  @media (max-width: 900px) {
+    display: initial;
+  }
+}
+
 #blog-intro {
   position: relative;
   border-radius: 8px 8px 0 0;
@@ -751,7 +795,7 @@ i.align:before {
   }
 
   p {
-    font: var(--p-big);
+    font: var(--p);
   }
 
   img {
@@ -812,7 +856,7 @@ i.align:before {
 
   p,
   li {
-    font: var(--p-big);
+    font: var(--p);
     color: var(--gray-90);
   }
 
@@ -920,7 +964,7 @@ i.align:before {
     top: 50%;
     pointer-events: none;
     background-color: var(--t-primary-color);
-    font: var(--p-big);
+    font: var(--p);
   }
 
   div#content {
@@ -1048,7 +1092,7 @@ i.align:before {
     display: flex;
     flex-direction: column;
     gap: 3em;
-    font: var(--p-big);
+    font: var(--p);
     min-height: 24em;
 
     background-color: var(--primary-color);
@@ -1095,8 +1139,13 @@ i.align:before {
       }
 
       p {
-        font: var(--p-big);
+        font: var(--p);
         margin-bottom: var(--margin-xs);
+      }
+
+      >span {
+        display: block;
+        margin-top: var(--margin-xs);
       }
     }
   }

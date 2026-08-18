@@ -1,0 +1,32 @@
+{{/* Template for the blog articles list */}}
+
+{{define "blog_articles"}}
+  {{template "main-head" (dict
+    "Title" "Blazium Engine - Blazium blog"
+    "Description" "Stay up-to-date with news about Blazium"
+    "Url" "/blog"
+  )}}
+  {{template "content-blog" .}}
+  {{template "main-foot"}}
+{{end}}
+
+{{define "content-blog"}}
+  <h1>Blazium blog</h1>
+  {{if eq (len .Items) 0}}
+    <p>No articles found.</p>
+  {{else}}
+    <section class="card-grid-container fill">
+    {{range $item := .Items}}
+      <article class="blog-article-card">
+        <img src={{$item.Cover}} loading="lazy">
+        <section>
+          <a href="/articles/{{$item.Slug}}">
+            <h2>{{$item.Title}}</h2>
+          </a>
+          <p>{{$item.Description}}</p>
+        </section>
+      </article>
+    {{end}}
+    </section>
+  {{end}}
+{{end}}

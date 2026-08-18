@@ -1,6 +1,7 @@
 {
     "os": ["Windows", "Linux", "MacOS"],
     "names": {
-        "Blazium CLI": "cli"
+        "Blazium CLI": "cli",
+        "Blazium HUB": "hub"
     }
 }
