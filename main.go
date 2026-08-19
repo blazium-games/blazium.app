@@ -32,6 +32,43 @@ type GameArticle struct {
 	ArticleData ArticleData
 }
 
+type BlogArticleHost struct {
+	Name string `json:"name"`
+	Url  string `json:"url"`
+}
+
+type BlogArticleIndexData struct {
+	Slug        string `json:"slug"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Cover       string `json:"cover"`
+	Date        string `json:"date"`
+	Hosts       []BlogArticleHost `json:"hosts"`
+	Link        string `json:"link"`
+	Guid        string `json:"guid"`
+}
+
+type BlogArticlesIndex struct {
+	Generated_at string `json:"generated_at"`
+	Count        int `json:"count"`
+	Items        []BlogArticleIndexData `json:"items"`
+}
+
+
+type BlogArticleMetadata struct {
+  Slug string `json:"slug"`
+  Title string `json:"title"`
+  Description string `json:"description"`
+  Cover string `json:"cover"`
+  Date string `json:"date"`
+  Changes string `json:"changes"`
+  Author string `json:"author"`
+  Hosts []BlogArticleHost `json:"hosts"`
+  Link string `json:"link"`
+  Content_bbcode string `json:"content_bbcode"`
+  Content_md string `json:"content_md"`
+}
+
 // LoadMirrors reads the mirrors from a JSON file and returns them as a slice of strings.
 func LoadMirrors() ([]string, error) {
 	// Construct the file path for mirrors.json
@@ -360,6 +397,76 @@ func ChangelogHandler(w http.ResponseWriter, r *http.Request) {
 	serveTemplate(w, "changelog-article", content)
 }
 
+func BlogArticlesIndexHandler(w http.ResponseWriter, r *http.Request) {
+	url := cdnPublicBase() + "/articles/index.json"
+	resp, err := http.Get(url)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error getting articles index data: %v", err), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error reading articles index body: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	var articleIndexData BlogArticlesIndex 
+
+	if err := json.Unmarshal(body, &articleIndexData); err != nil {
+		http.Error(w, fmt.Sprintf("Error reading articles index JSON: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	serveTemplate(w, "blog_articles", articleIndexData)
+}
+
+func BlogArticleHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+
+	url := cdnPublicBase() + "/articles/" + slug + "/meta.json"
+	resp, err := http.Get(url)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error getting article data: %v", err), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error reading article data: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	var articleData BlogArticleMetadata
+
+	if err := json.Unmarshal(body, &articleData); err != nil {
+		http.Error(w, fmt.Sprintf("Error reading article JSON: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// get the article content
+	contentUrl := cdnPublicBase() + "/articles/" + slug + "/content.md"
+	contentResp, err := http.Get(contentUrl)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error getting article content: %v", err), http.StatusInternalServerError)
+		return
+	}
+	defer contentResp.Body.Close()
+
+	contentBody, err := io.ReadAll(contentResp.Body)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error reading article content: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	articleData.Content_md = string(mdToHTML(contentBody))
+
+	serveTemplate(w, "blog_article", articleData)
+}
+
 func EditorFilesShaHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	shaType := vars["shaType"]
@@ -564,7 +671,6 @@ func main() {
 	ServeFile(r, "llms.txt")
 	ServeFile(r, "humans.txt")
 
-
 	// Serve main.tmpl on the root path "/"
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		serveTemplate(w, "home", nil)
@@ -664,10 +770,12 @@ func main() {
 	}).Methods("GET")
 
 	// Redirect to IndieDB articles
-	r.HandleFunc("/blog", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Location", "https://www.indiedb.com/engines/blazium-engine/articles")
-		w.WriteHeader(http.StatusPermanentRedirect)
-	}).Methods("GET")
+	// r.HandleFunc("/blog", func(w http.ResponseWriter, r *http.Request) {
+		// w.Header().Set("Location", "https://www.indiedb.com/engines/blazium-engine/articles")
+		// w.WriteHeader(http.StatusPermanentRedirect)
+	// }).Methods("GET")
+	r.HandleFunc("/blog", BlogArticlesIndexHandler).Methods("GET")
+	r.HandleFunc("/articles/{slug}", BlogArticleHandler).Methods("GET")
 
 	// Redirect to discord server invite
 	r.HandleFunc("/chat", func(w http.ResponseWriter, r *http.Request) {

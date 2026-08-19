@@ -1,0 +1,24 @@
+{{/* Template for the blog article */}}
+
+{{define "blog_article"}}
+  {{template "main-head" (dict
+    "Title" .Title
+    "Description" .Description
+    "Url" (printf "/articles/%s" .Slug)
+  )}}
+  {{template "content-article" .}}
+  {{template "main-foot"}}
+{{end}}
+
+{{define "content-article"}}
+  <section class="blog-article-header">
+    <img src="{{.Cover}}" />
+    <div>
+      <h1>{{.Title}}</h1>
+      <p>{{.Description}}</p>
+    </div>
+  </section>
+  <section class="article md">
+    {{toHTML .Content_md}}
+  </section>
+{{end}}
