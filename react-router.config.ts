@@ -96,4 +96,8 @@ export default {
       copyFileSync(rootIndex, join(clientDir, "404.html"));
     }
   },
+  allowedActionOrigins: process.env["NODE_ENV"] === "development" ? [] : [
+    "squid-app-bpdbo.ondigitalocean.app",
+    "blazium.app",
+  ],
 } satisfies Config;
