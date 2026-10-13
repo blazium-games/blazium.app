@@ -1,10 +1,5 @@
 # [blazium.app](https://blazium.app)
 
-The primary source code for the Blazium website.
+The official website for Blazium Engine.
 
-## Tip for local development
-
-Use the `--local` flag to do requests to `blazium.app` instead of cerbero for editor and tools data.
-```
-go run . --local
-```
+This repository is the source of truth for [https://blazium.app](https://blazium.app). News lists are loaded from the [articles RSS feed](https://cdn.blazium.app/articles/rss.xml).

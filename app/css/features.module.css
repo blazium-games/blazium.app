@@ -1,0 +1,131 @@
+.main {
+  img {
+    border: var(--card-border);
+    border-radius: var(--spacing-3xs);
+  }
+
+  hgroup {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, auto);
+    gap: var(--spacing-2xs);
+
+    h1 {
+      align-self: self-end;
+    }
+
+    img {
+      grid-column: 2;
+      grid-row: 1 / -1;
+    }
+
+    @media (width<900px) {
+      grid-template-columns: 1fr;
+
+      img {
+        grid-column: 1;
+        grid-row: -1;
+      }
+    }
+  }
+
+  >section {
+    margin-top: var(--spacing-4xl);
+    display: grid;
+    column-gap: var(--spacing-2xs);
+    scroll-margin-top: var(--spacing-4xl);
+    grid-template-columns: 1fr 4fr;
+
+    aside,
+    article {
+      scroll-margin-top: var(--spacing-4xl);
+      background-image: var(--card-bg);
+      padding: var(--spacing-xs);
+      border: var(--card-border);
+      border-radius: var(--card-border-radius);
+      border-left-color: var(--color-accent);
+    }
+
+    aside {
+      text-wrap-mode: nowrap;
+      grid-column: 1;
+      align-self: self-start;
+      position: sticky;
+      top: var(--spacing-4xl);
+
+      details {
+        summary {
+          display: list-item;
+          width: 100%;
+        }
+
+        nav {
+          border: var(--card-border);
+          border-radius: var(--spacing-3xs);
+          background-color: var(--color-bg);
+          line-height: var(--line-h-loose);
+        }
+      }
+
+      >ul {
+        margin-top: var(--spacing-xs);
+        list-style: none;
+
+        ul {
+          margin-left: var(--spacing-2xl);
+        }
+      }
+
+      a {
+        color: var(--color-text-muted);
+
+        &:hover {
+          color: initial;
+        }
+      }
+    }
+
+    section {
+      grid-column: 2;
+      display: grid;
+      row-gap: var(--spacing-2xs);
+      max-width: var(--max-readable-width);
+
+      &+section {
+        border-top: var(--card-border);
+        padding-top: var(--spacing-m);
+        margin-top: var(--spacing-m);
+      }
+
+      article {
+        >*+* {
+          margin-top: var(--spacing-xs);
+        }
+
+        ul {
+          display: flex;
+          list-style: none;
+          gap: var(--spacing-2xs);
+          flex-wrap: wrap;
+        }
+      }
+    }
+
+    @media (width<900px) {
+      grid-template-columns: 1fr;
+
+      aside,
+      section {
+        grid-column: auto;
+      }
+
+      aside {
+        position: initial;
+      }
+
+      section {
+        margin-inline: auto;
+      }
+    }
+  }
+}

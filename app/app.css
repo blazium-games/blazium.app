@@ -1,0 +1,256 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+
+html {
+  --hue: 295;
+  --color-bg-dark: oklch(0.18 0.05 var(--hue));
+  --color-bg: oklch(0.28 0.05 var(--hue));
+  --color-bg-light: oklch(0.33 0.05 var(--hue));
+
+  --color-text: oklch(0.95 0.05 var(--hue));
+  --color-text-muted: oklch(from var(--color-text) l c h / 0.8);
+
+  --color-accent: oklch(0.50 0.25 300);
+
+  --color-danger: oklch(0.7 0.18 30);
+  --color-warning: oklch(0.7 0.18 100);
+  --color-success: oklch(0.7 0.18 160);
+  --color-info: oklch(0.7 0.18 260);
+
+  --font-f-heading: "Roboto", sans-serif;
+  --font-f-text: "Inter", sans-serif;
+
+  --font-s-h1: 2.500rem;
+  --font-s-h2: 2.250rem;
+  --font-s-h3: 1.777rem;
+  --font-s-h4: 1.333rem;
+  --font-s-h5: 1.125rem;
+  --font-s-h6: 1.000rem;
+  --font-s-p: 1.000rem;
+  --font-s-small: 0.875rem;
+
+  --font-w-thin: 100;
+  --font-w-extralight: 200;
+  --font-w-light: 300;
+  --font-w-normal: 400;
+  --font-w-medium: 500;
+  --font-w-semibold: 600;
+  --font-w-bold: 700;
+  --font-w-extrabold: 800;
+  --font-w-black: 900;
+
+  --line-h-tight: 1.00em;
+  --line-h-base: 1.25em;
+  --line-h-loose: 1.50em;
+
+  --spacing-3xs: 0.125rem;
+  --spacing-2xs: 0.25rem;
+  --spacing-xs: 0.50rem;
+  --spacing-s: 0.75rem;
+  --spacing-m: 1.00rem;
+  --spacing-l: 1.25rem;
+  --spacing-xl: 1.50rem;
+  --spacing-2xl: 1.75rem;
+  --spacing-3xl: 2.50rem;
+  --spacing-4xl: 3.75rem;
+  --spacing-5xl: 6.25rem;
+  --spacing-6xl: 10.00rem;
+  --spacing-7xl: 15.00rem;
+
+  --h1: var(--font-w-semibold) var(--font-s-h1)/var(--line-h-tight) var(--font-f-heading);
+  --h2: var(--font-w-semibold) var(--font-s-h2)/var(--line-h-tight) var(--font-f-heading);
+  --h3: var(--font-w-semibold) var(--font-s-h3)/var(--line-h-tight) var(--font-f-heading);
+  --h4: var(--font-w-semibold) var(--font-s-h4)/var(--line-h-tight) var(--font-f-heading);
+  --h5: var(--font-w-semibold) var(--font-s-h5)/var(--line-h-base) var(--font-f-heading);
+  --h6: var(--font-w-semibold) var(--font-s-h6)/var(--line-h-base) var(--font-f-heading);
+  --p: var(--font-w-normal) var(--font-s-p)/var(--line-h-base) var(--font-f-text);
+  --small: var(--font-w-normal) var(--font-s-small)/var(--line-h-base) var(--font-f-text);
+
+  background-color: var(--color-bg-dark);
+  color-scheme: dark;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-bg-light) var(--color-bg-dark);
+  font-family: var(--font-f-text);
+  color: var(--color-text);
+
+  &,
+  * {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline-color: var(--color-text);
+  }
+
+  h1 {
+    font: var(--h1);
+  }
+
+  h2 {
+    font: var(--h2);
+  }
+
+  h3 {
+    font: var(--h3);
+  }
+
+  h4 {
+    font: var(--h4);
+  }
+
+  h5 {
+    font: var(--h5);
+  }
+
+  h6 {
+    font: var(--h6);
+  }
+
+  p {
+    font: var(--p);
+  }
+
+  small {
+    font: var(--small);
+  }
+
+  code {
+    font: var(--p);
+    font-family: monospace;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.1s;
+  }
+
+  details summary {
+    cursor: pointer;
+  }
+
+  hr {
+    height: 1px;
+    background-color: var(--color-bg-light);
+    margin-block: var(--spacing-xs);
+    opacity: 0.5;
+  }
+
+  &:has(dialog:popover-open),
+  &:has(dialog[open]) {
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  &:has(dialog:popover-open) {
+    pointer-events: none;
+  }
+
+  dialog:popover-open {
+    pointer-events: auto;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  img {
+    user-select: none;
+    -webkit-user-drag: none;
+    width: 100%;
+  }
+}
+
+body {
+  min-height: 100dvh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  z-index: 0;
+
+  --circle-color: oklch(24.896% 0.05062 294.356);
+  background-image:
+    radial-gradient(circle at 10% 20%, var(--circle-color), transparent 50%),
+    radial-gradient(circle at 90% 40%, var(--circle-color), transparent 45%),
+    radial-gradient(circle at 50% 80%, var(--circle-color), transparent 60%);
+  background-attachment: fixed;
+
+  --max-readable-width: 80ch;
+  --card-border-radius: 0 var(--spacing-2xs) var(--spacing-2xs) 0;
+  --card-border: 1px solid var(--color-bg-light);
+  --card-bg: linear-gradient(var(--color-bg-light), var(--color-bg) 50%);
+  --card-bg-transparent: linear-gradient(
+    oklch(from var(--color-bg-light) l c h / 0.9),
+    oklch(from var(--color-bg) l c h / 0.9) 50%
+  );
+}
+
+main {
+  max-width: 1200px;
+  margin-inline: auto;
+  margin-bottom: auto;
+  padding-inline: var(--spacing-2xs);
+}
+
+button,
+.button {
+  cursor: pointer;
+  user-select: none;
+
+  display: inline-flex;
+  gap: var(--spacing-2xs);
+  align-items: center;
+  width: fit-content;
+
+  padding: var(--spacing-3xs) var(--spacing-xs);
+
+  font-family: var(--font-f-text);
+  font-size: var(--font-s-h6);
+  font-weight: var(--font-w-medium);
+  text-wrap-mode: nowrap;
+
+  color: var(--color-text);
+
+  --bg-color: var(--color-accent);
+  --bg-color-light: oklch(from var(--bg-color) calc(l + 0.1) c h);
+  background-image: linear-gradient(var(--bg-color-light), var(--bg-color) 50%);
+
+  border: 2px solid var(--bg-color-light);
+  border-radius: var(--spacing-2xs);
+
+  box-shadow: 0 2px 4px oklch(from black l c h / 0.3);
+  --text-shadow: 0 2px 2px oklch(from black l c h / 0.3);
+  text-shadow: var(--text-shadow);
+
+  transition-property: border-color, box-shadow, translate;
+  transition-duration: 30ms;
+
+  &.secondary {
+    --bg-color: var(--color-bg-light);
+  }
+
+  &:active {
+    box-shadow: 0 1px 1px oklch(from black l c h / 0.2);
+    translate: 0 1px;
+  }
+
+  >svg {
+    width: 1em;
+    height: 1em;
+    filter: drop-shadow(var(--text-shadow));
+  }
+}
+
+select {
+  background-color: var(--color-bg-dark);
+  color: var(--color-text);
+  font: var(--p);
+  font-size: var(--font-s-h6);
+  padding: var(--spacing-2xs) var(--spacing-xs);
+  border: 1px solid var(--color-bg-light);
+  border-radius: var(--spacing-2xs);
+  min-width: 150px;
+
+  option:checked {
+    background-color: var(--color-accent);
+  }
+}

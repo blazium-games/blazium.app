@@ -1,0 +1,229 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://blazium.app",
+      "name": "Blazium Engine",
+      "url": "https://blazium.app",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://blazium.app/og-image.png"
+      },
+      "description": "Blazium Engine is a free, open-source, community-driven fork of Godot for building cross-platform 2D and 3D games and applications, with additional modules, platform integrations, and workflow improvements.",
+      "sameAs": [
+        "https://github.com/blazium-games/blazium",
+        "https://x.com/BlaziumGames",
+        "https://discord.gg/vmJMrGAcb2"
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "contactType": "Community Support",
+          "url": "https://blazium.app/chat",
+          "availableLanguage": "en"
+        }
+      ]
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://blazium.app",
+      "name": "Blazium Engine",
+      "description": "Free and open-source 2D and 3D cross-platform game engine based on Godot, with extra modules for Steam, Discord, AI tooling, multiuser editing, testing, and platform integrations.",
+      "url": "https://blazium.app",
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "Windows, macOS, Linux, Android, iOS, Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "license": "https://opensource.org/licenses/MIT",
+      "creator": {
+        "@id": "https://blazium.app"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://blazium.app",
+      "name": "Blazium Engine",
+      "url": "https://blazium.app",
+      "publisher": {
+        "@id": "https://blazium.app"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://blazium.app",
+      "name": "Blazium Game Engine",
+      "url": "https://blazium.app",
+      "description": "Official landing page for Blazium Game Engine"
+    },
+    {
+      "@type": "FAQPage",
+      "name": "Frequently Asked Questions about Blazium Engine",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Blazium Engine?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Blazium Engine is a free, open-source, community-driven fork of Godot designed for building cross-platform 2D and 3D games and applications. It includes all core Godot features plus additional modules, platform integrations, and workflow improvements."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Blazium Engine free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Blazium Engine is completely free and open source under the MIT license. There are no royalties, no fees, and no strings attached."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Blazium based on Godot?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Blazium is a fork of the Godot Engine. It maintains high compatibility with Godot projects while adding new modules, quality-of-life improvements, and platform-specific integrations."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I open Godot projects in Blazium?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Blazium is designed to be compatible with Godot 4.x projects. Opening a Godot 4.3 project in a matching Blazium build should work with little or no changes, and GDExtensions remain compatible."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What platforms does Blazium support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Blazium supports export to Windows, macOS, Linux, Android, iOS, Web (HTML5), and additional targets such as Discord Embedded Apps, YouTube Playables, Steam, and console workflows where platform access is available."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can Blazium create both 2D and 3D games?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Blazium is a full 2D and 3D game engine. It supports a wide range of game types including platformers, RPGs, shooters, simulations, XR experiences, and more."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Blazium include Steam integration?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Blazium includes a native Steam module that provides achievements, stats, inventory, web API tickets, and server authentication without requiring external extensions."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Blazium support Discord integration?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Blazium offers native Discord support, including Discord Embedded Apps for Activities and a Discord Social SDK module for rich presence, friends, invites, and social features."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the MCP module in Blazium?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The MCP (Model Context Protocol) module embeds a full MCP server in the Blazium editor. It gives AI agents access to specialized tools for inspecting and modifying scenes, scripts, resources, shaders, and other project elements."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Blazium have multiuser editing?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Blazium includes a Multiuser Editor module that supports collaborative editing with CRDT script sync, filesystem transfer, permissions, and live presence inside the editor."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is Autowork in Blazium?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Autowork is a built-in testing and automation framework. It supports validation tests, smoke tests, unit tests, and project checks to help automate gameplay testing and regression verification."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Blazium use Jolt Physics?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Blazium integrates Jolt Physics as an option alongside the classic Godot physics engines, providing an additional high-performance physics solution that many developers already use."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Who owns games made with Blazium?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You own the games you create with Blazium. The engine is MIT-licensed, and your source code, assets, and game project remain fully yours with no royalties claimed by Blazium."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I sell games made with Blazium?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Because you own your project and there are no royalties, you can commercially release, distribute, and monetize games created with Blazium on Steam, itch.io, mobile stores, and other platforms."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is Blazium different from Godot?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Blazium is a fork of Godot that keeps core compatibility while adding native modules for Steam, Discord, MCP/AI tooling, multiuser editing, Autowork testing, platform integrations (YouTube Playables, Discord Activities, GDK), and other workflow improvements not present in stock Godot."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Blazium suitable for beginners?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Because Blazium is based on Godot, beginners can use the large existing ecosystem of Godot tutorials, documentation, and concepts while also benefiting from Blazium’s extra tools and modules."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can professional developers use Blazium?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Professional teams can use Blazium for full production workflows, including source-level control, testing with Autowork, collaborative multiuser editing, CI/CD support, and native platform integrations."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where can I download Blazium Engine?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can download the latest Blazium Engine releases from the official website at https://blazium.app/download and from community distribution channels linked on the project pages."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where is the official documentation?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Official documentation is available at https://docs.blazium.app. It covers engine features, class reference, tutorials, and contribution guidelines."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How can I contribute to Blazium?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "You can contribute by reporting bugs, submitting pull requests, improving documentation, or joining the community on Discord and GitHub. The project is fully community-driven and welcomes contributions."
+          }
+        }
+      ]
+    }
+  ]
+}
