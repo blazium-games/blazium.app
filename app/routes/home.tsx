@@ -5,7 +5,7 @@ import { Link } from "react-router";
 import { showcases } from "~/data/showcases";
 import { ArticleCard } from "./news";
 import { publicAsset } from "~/lib/publicAsset";
-import type { ArticlesIndex } from "~/types";
+import { loadArticles } from "~/lib/articlesRss";
 import { SiReadthedocs } from "react-icons/si";
 import { IoLogoDiscord } from "react-icons/io5";
 import { FaSquareGithub } from "react-icons/fa6";
@@ -13,13 +13,11 @@ import { FaSquareGithub } from "react-icons/fa6";
 export async function loader({ }: Route.LoaderArgs) {
   const showcase = showcases[Math.floor(Math.random() * showcases.length)];
 
-  const response = await fetch(`https://cdn.blazium.app/articles/index.json`);
-
-  const index: ArticlesIndex = await response.json();
+  const index = await loadArticles();
 
   return {
     showcase,
-    news: index.items.slice(0, 4),
+    news: index?.items.slice(0, 4) ?? [],
   };
 }
 

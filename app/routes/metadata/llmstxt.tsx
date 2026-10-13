@@ -1,7 +1,7 @@
 import type { Route } from "../metadata/+types/llmstxt";
 import { LINKS } from "~/data/links";
-import type { ArticlesIndex } from "~/types";
 import { defaults } from "comps/metatags";
+import { loadArticles } from "~/lib/articlesRss";
 
 const HOST = "https://blazium.app";
 
@@ -55,9 +55,8 @@ This site is documentation/marketing, not an API service. There are no API keys 
 `;
 
 export async function loader({ }: Route.LoaderArgs) {
-  const response = await fetch(`https://cdn.blazium.app/articles/index.json`);
-  const index: ArticlesIndex = await response.json();
-  const latest_news = index.items.slice(0, 8).map(entry => 
+  const index = await loadArticles();
+  const latest_news = (index?.items ?? []).slice(0, 8).map(entry => 
     `- [${entry.title}](/news/${entry.slug}): ${entry.description}`
   ).join("\n");
 

@@ -1,19 +1,13 @@
 import type { Route } from "./+types/news";
 import style from "css/news.module.css";
 import { MetaTags } from "comps/metatags";
-import type { ArticleIndexData, ArticlesIndex } from "~/types";
+import type { ArticleIndexData } from "~/types";
 import { Link } from "react-router";
 import { FaRss } from "react-icons/fa6";
+import { ARTICLES_RSS_URL, loadArticles } from "~/lib/articlesRss";
 
 export async function loader({ }: Route.LoaderArgs) {
-  const response = await fetch(`https://cdn.blazium.app/articles/index.json`);
-
-  if (!response.ok) {
-    return null;
-  }
-
-  const index: ArticlesIndex = await response.json();
-  return index;
+  return loadArticles();
 }
 
 export async function markdown() {
@@ -56,7 +50,7 @@ export default ({ loaderData }: Route.ComponentProps) => {
     />
     <main className={style["main"]}>
       <h1>News</h1>
-      <Link to="https://cdn.blazium.app/articles/rss.xml" className="button secondary"><FaRss />RSS</Link>
+      <Link to={ARTICLES_RSS_URL} className="button secondary"><FaRss />RSS</Link>
       {loaderData?.items.map(entry => <ArticleCard key={entry.slug} data={entry} />)}
     </main>
   </>

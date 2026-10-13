@@ -1,10 +1,10 @@
 import { copyFileSync, existsSync, readdirSync, renameSync, rmSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { Config } from "@react-router/dev/config";
-import type { ArticlesIndex } from "~/types";
+import { loadArticles } from "./app/lib/articlesRss";
 
 const isPagesPreview = process.env["GITHUB_PAGES"] === "true";
-const pagesBase = "/blazium.app-v2/";
+const pagesBase = "/blazium.app/";
 
 const prerender = [
   "/features",
@@ -36,14 +36,8 @@ const pagesPrerender = [
 ];
 
 async function getArticlesSlugs() {
-  const response = await fetch(`https://cdn.blazium.app/articles/index.json`);
-
-  if (!response.ok) {
-    return [];
-  }
-
-  const index: ArticlesIndex = await response.json();
-  return index.items.map(article => article.slug);
+  const index = await loadArticles();
+  return index?.items.map(article => article.slug) ?? [];
 }
 
 function moveBuildEntry(src: string, dest: string) {
@@ -80,7 +74,7 @@ export default {
     if (!isPagesPreview || !args.viteConfig.isProduction) return;
 
     const clientDir = join(process.cwd(), "build", "client");
-    const siteDir = join(clientDir, "blazium.app-v2");
+    const siteDir = join(clientDir, "blazium.app");
     const indexPath = join(siteDir, "index.html");
     if (!existsSync(indexPath)) return;
 

@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import { reactRouter } from "@react-router/dev/vite";
 import { envOnlyMacros } from "vite-env-only";
 
-const pagesBase = process.env["GITHUB_PAGES"] === "true" ? "/blazium.app-v2/" : "/";
+const pagesBase = process.env["GITHUB_PAGES"] === "true" ? "/blazium.app/" : "/";
 
 export default defineConfig(() => {
   return {

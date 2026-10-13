@@ -1,5 +1,5 @@
-# [blazium.app v2](https://blazium.app)
+# [blazium.app](https://blazium.app)
 
 The official website for Blazium Engine.
 
-> [Previous website repository](https://github.com/blazium-games/blazium.app)
+This repository is the source of truth for [https://blazium.app](https://blazium.app). News lists are loaded from the [articles RSS feed](https://cdn.blazium.app/articles/rss.xml).

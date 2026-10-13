@@ -1,5 +1,5 @@
-import type { ArticlesIndex } from "~/types";
 import type { Route } from "../metadata/+types/sitemap";
+import { loadArticles } from "~/lib/articlesRss";
 
 type sitemapFreq = (
   "always"
@@ -88,13 +88,15 @@ function makeurl(url: sitemapURL) {
 }
 
 export async function loader({ }: Route.LoaderArgs) {
-  const response = await fetch(`https://cdn.blazium.app/articles/index.json`);
-  const index: ArticlesIndex = await response.json();
-  const news = index.items.map(entry => {
+  const index = await loadArticles();
+  const news = (index?.items ?? []).map(entry => {
+    const published = new Date(entry.date);
     const url: sitemapURL = {
       loc: `/news/${entry.slug}`,
-      lastmod: entry.date,
     };
+    if (!Number.isNaN(published.getTime())) {
+      url.lastmod = published.toISOString().slice(0, 10);
+    }
     return makeurl(url);
   }).join("");
 
