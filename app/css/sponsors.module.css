@@ -1,0 +1,46 @@
+.main {
+  h1 {
+    font: var(--h2);
+    text-align: center;
+    margin-top: var(--spacing-m);
+  }
+
+  section {
+    margin-top: var(--spacing-m);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: var(--spacing-2xs);
+
+    @media (width<1200px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (width<900px) {
+      grid-template-columns: 1fr;
+    }
+
+    a {
+      display: contents;
+    }
+
+    img {
+      aspect-ratio: 3;
+      height: 100%;
+      background-image: var(--card-bg);
+      padding: var(--spacing-xl);
+      border-radius: var(--spacing-2xs);
+      border: var(--card-border);
+    }
+  }
+
+  p {
+    margin-top: var(--spacing-xl);
+    text-align: center;
+
+    a {
+      text-decoration: underline;
+    }
+  }
+}

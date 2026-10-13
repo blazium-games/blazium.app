@@ -1,37 +1,25 @@
-# Stage 1: Build the Go binary
-FROM golang:1.23-alpine AS builder
-
-# Set the working directory inside the container
+FROM node:24-alpine AS development-dependencies-env
+COPY . /app
 WORKDIR /app
+RUN npm ci
 
-# Copy the go.mod and go.sum files first
-COPY go.mod go.sum ./
-
-# Download and cache Go modules
-RUN go mod download
-
-# Copy the rest of the application source code
-COPY . .
-
-# Build the Go application
-RUN go build -o server .
-
-# Stage 2: Create a smaller image to run the binary
-FROM alpine:3.18
-
-# Set the working directory inside the container
+FROM node:24-alpine AS production-dependencies-env
+COPY ./package.json package-lock.json /app/
 WORKDIR /app
+RUN npm ci --omit=dev
 
-# Copy the built binary from the builder stage
-COPY --from=builder /app/server .
+FROM node:24-alpine AS build-env
+COPY . /app/
+COPY --from=development-dependencies-env /app/node_modules /app/node_modules
+WORKDIR /app
+RUN npm run build
 
-# Copy the static and data folders into the container
-COPY ./static ./static
-COPY ./data ./data
-COPY ./templates ./templates
+FROM node:24-alpine
+COPY ./package.json package-lock.json /app/
+COPY --from=production-dependencies-env /app/node_modules /app/node_modules
+COPY --from=build-env /app/build /app/build
 
-# Expose the port that the app will run on
+WORKDIR /app
+ENV PORT=8080
 EXPOSE 8080
-
-# Run the Go application
-CMD ["./server"]
+CMD ["npm", "run", "start"]

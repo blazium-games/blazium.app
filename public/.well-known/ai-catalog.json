@@ -1,0 +1,33 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Blazium Engine",
+    "identifier": "blazium.app",
+    "description": "Blazium Engine is a free, open-source fork of Godot for building cross-platform 2D and 3D games and applications, with the tools, platform integrations, and improvements you need.",
+    "url": "https://blazium.app",
+    "documentationUrl": "https://docs.blazium.app"
+  },
+  "entries": [
+    {
+      "identifier": "urn:ai:blazium.app:content:index",
+      "displayName": "blazium.app content index",
+      "type": "text/plain",
+      "url": "https://blazium.app/llms.txt",
+      "description": "Top-level index of Blazium Engine inforamtion, news articles and social links. Start here to find the right resource for a task."
+    },
+    {
+      "identifier": "urn:ai:blazium.app:docs:index",
+      "displayName": "Blazium Engine documentation index",
+      "type": "text/html",
+      "url": "https://docs.blazium.app/",
+      "description": "Blazium Engine documentation"
+    },
+    {
+      "identifier": "urn:ai:blazium.app:news:index",
+      "displayName": "Blazium Games news index",
+      "type": "text/markdown",
+      "url": "https://blazium.app/news.md",
+      "description": "Index of Blazium Games news articles. Each article is also available as markdown by appending `.md`."
+    }
+  ]
+}
